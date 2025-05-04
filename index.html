@@ -118,17 +118,13 @@
   </div>
 
   <script>
-    function checkPassword() {
-      const pass = document.getElementById("password").value;
-      const correct = "0962746115";
-      if (pass === correct) {
-        document.getElementById("login-box").style.display = "none";
-        document.getElementById("main-content").style.display = "block";
-      } else {
-        document.getElementById("error").style.display = "block";
-      }
-    }
-  </script>
+  const url = new URL(window.location.href);
+  const token = url.searchParams.get("access");
+
+  if (token !== "fWUlMPeanXVLAxnCs3T8Tg") {
+    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>دخول غير مصرح به</h2>";
+  }
+</script>
 
 </body>
 </html>
