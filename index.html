@@ -16,7 +16,6 @@
       min-height: 100vh;
       padding: 20px;
     }
-
     #login-box {
       text-align: center;
       background-color: white;
@@ -24,15 +23,6 @@
       border-radius: 20px;
       box-shadow: 0 10px 20px rgba(0,0,0,0.2);
     }
-
-    input[type="password"] {
-      padding: 10px;
-      font-size: 1.2rem;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 20px;
-    }
-
     button {
       padding: 10px 20px;
       font-size: 1.2rem;
@@ -42,23 +32,18 @@
       color: white;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #a07f5c;
     }
-
     #main-content {
       display: none;
       text-align: center;
     }
-
     header h1 {
       font-size: 2.5rem;
       margin-bottom: 20px;
-      position: relative;
       color: #2f2f2f;
     }
-
     .button-container {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -67,7 +52,6 @@
       width: 100%;
       max-width: 500px;
     }
-
     .btn {
       background-color: #8c6e4e;
       color: white;
@@ -80,11 +64,9 @@
       text-decoration: none;
       transition: background 0.3s;
     }
-
     .btn:hover {
       background-color: #a07f5c;
     }
-
     @media (max-width: 500px) {
       .button-container {
         grid-template-columns: 1fr;
@@ -93,14 +75,11 @@
   </style>
 </head>
 <body>
-
-  <!-- صندوق كلمة المرور -->
+  <!-- صندوق NFC -->
   <div id="login-box">
-    <h2>أدخل كلمة المرور للدخول</h2>
-    <input type="password" id="password" placeholder="كلمة المرور">
-    <br>
-    <button onclick="checkPassword()">دخول</button>
-    <p id="error" style="color: red; display: none;">كلمة المرور غير صحيحة</p>
+    <h2>قرب بطاقة الـ NFC للدخول</h2>
+    <button id="nfc-button">قراءة البطاقة</button>
+    <p id="error" style="color: red; display: none;">البطاقة غير صالحة</p>
   </div>
 
   <!-- المحتوى الرئيسي -->
@@ -108,7 +87,6 @@
     <header>
       <h1>مرحبًا بكم في الصفحة الإسلامية</h1>
     </header>
-
     <div class="button-container">
       <a href="https://example.com/about" class="btn">ذاتية الطالب</a>
       <a href="https://example.com/quran" class="btn">القرآن الكريم</a>
@@ -118,13 +96,36 @@
   </div>
 
   <script>
-  const url = new URL(window.location.href);
-  const token = url.searchParams.get("access");
+    document.getElementById('nfc-button').addEventListener('click', async () => {
+      if ('NDEFReader' in window) {
+        try {
+          const ndef = new NDEFReader();
+          await ndef.scan();
+          console.log("بانتظار البطاقة...");
 
-  if (token !== "fWUlMPeanXVLAxnCs3T8Tg") {
-    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>دخول غير مصرح به</h2>";
-  }
-</script>
+          ndef.onreading = event => {
+            const decoder = new TextDecoder();
+            for (const record of event.message.records) {
+              const data = decoder.decode(record.data);
+              console.log("تمت قراءة:", data);
 
+              const correctPassword = "ه14863";
+              if (data.trim() === correctPassword) {
+                document.getElementById("login-box").style.display = "none";
+                document.getElementById("main-content").style.display = "block";
+              } else {
+                document.getElementById("error").style.display = "block";
+              }
+            }
+          };
+        } catch (error) {
+          console.error("خطأ في قراءة NFC:", error);
+          alert("حدث خطأ أثناء محاولة قراءة البطاقة.");
+        }
+      } else {
+        alert("جهازك أو متصفحك لا يدعم NFC.");
+      }
+    });
+  </script>
 </body>
 </html>
